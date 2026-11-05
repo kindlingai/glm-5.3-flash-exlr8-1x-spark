@@ -5,3 +5,5 @@ gr8/.git
 .env
 **/__pycache__
 .DS_Store
+docs
+kindling.json

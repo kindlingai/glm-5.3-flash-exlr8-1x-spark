@@ -4,15 +4,9 @@ GLM-5.3-Flash on one ASUS GX10 / NVIDIA DGX Spark (GB10, 128 GB), served by [gr8
 from the K2 width of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
 int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache on disk.
 
-| | |
-|---|---|
-| hardware | one ASUS GX10 / DGX Spark (GB10, 128 GB) |
-| weights | exlr8 K2, 93 GB on the device |
-| KV pool | 262,208 tokens in all (int4, 2.9 GB), shared by the sessions (`CAP`) |
-| longest session | 262,194 tokens, prompt and output together (one past 32K runs alone, gr8's `SHARE_LIMIT`) |
-| sessions at once | 4 (a request alone drafts with DFlash2) |
-| decode, one request | 54.7 tok/s code, 29.3 prose, 66.5 structured |
-| prefill | about 1,200 tok/s to 32K, 923 at 240K |
+![GLM-5.3-Flash on one GB10: decode, prefill and concurrency](docs/card.png)
+
+![Four requests decoding at once on one GB10, at 2x speed](docs/concurrency-4.gif)
 
 > Work in progress: the gr8 changes are in review (kindlingai/gr8#347, #348, #349, #352), and the submodule points at
 > their combined branch until they land.
@@ -60,19 +54,22 @@ A prompt's prefill keeps a checkpoint at its last multiple of 4,096 tokens in th
 is the same bit for bit. Checkpoints outlive restarts (a new engine build, release or `CAP` starts empty), and a copy
 stays in RAM the box is not using, which the kernel takes back when it needs it.
 
-## Measured
+## More numbers
 
-One GX10 on kindling spark-os with the defaults, clocks uncapped, `gr8 glm53f bench`:
+The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.json`; regenerate it with
+`python3 gr8/bench/bench.py kindling REPORT.json --out kindling.json --config-id tp1`, from kindlingai/gr8#354). The rest, from the same box
+(one GX10 on kindling spark-os, clocks uncapped, the bench cooling to 55 C before each stage):
 
 | | |
 |---|---|
-| decode, one request (tok/s) | code 54.7, prose 29.3, structured 66.5 (MTP only: 32.4, 29.2, 32.1) |
-| decode, 4 / 8 requests at once | 57 / 59 tok/s in total |
-| prefill, 8K / 32K / 128K / 240K | 1,172 / 1,222 / 1,156 / 923 tok/s (1,235 / 1,236 at 8K / 32K with `DFLASH=0`) |
-| time to first token, 32K / 240K | 26.7 s / 266 s cold; 0.25 s / 5.7 s from the prompt cache |
+| weights on the device | 93.4 GB (K2) |
+| KV pool | 262,208 tokens (int4, 2.9 GB), shared by up to 4 sessions; one past 32K runs alone (gr8's `SHARE_LIMIT`) |
+| longest session | 262,194 tokens, prompt and output together |
+| decode, MTP only (`DFLASH=0`) | code 32.4, prose 29.2, structured 32.1 tok/s |
+| prefill, 240K prompt | 923 tok/s, 266 s to the first token |
+| from the prompt cache | 32K prompt 0.25 s and 240K prompt 5.7 s to the first token |
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
-| needle at 128K, count to 200 | pass |
-| lowest free memory, 240K prompt | 5.3 GiB |
-| boot | 45 s from the cache; first boot 8 min at 160 MB/s |
+| lowest free memory | 5.3 GiB under a 240K prompt |
+| boot | 45 s from the cache; the first boot downloads 85 GB at about 160 MB/s (8 min) and converts the drafter in 5 s |
 
-The GPU reaches 90 C in a 128K prefill and is then held at 1,800 MHz, so the longer prefills are partly capped.
+The GPU reaches 90 C in a 128K prefill, and the bench then holds it at 1,800 MHz, so the long prefills are partly capped.
