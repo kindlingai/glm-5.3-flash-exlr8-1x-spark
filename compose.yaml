@@ -1,0 +1,76 @@
+# GLM-5.3-Flash on one GB10 box (ASUS GX10 / DGX Spark): gr8, the K2 exlr8 release, int4 KV, a prompt cache on disk.
+#
+#   docker compose up -d --build        # builds the image, fetches the model from Hugging Face, serves on port 8100
+#   docker compose logs -f              # the supervisor; ready when it prints that the cluster serves
+#   docker compose exec gr8 /opt/gr8/gr8 glm53f smoke
+#
+# .env (optional, .env.example) overrides the settings below. Compose reads it from this file's directory.
+name: glm53f-1-spark
+services:
+  gr8:
+    build:
+      context: .
+    image: ${IMAGE:-glm53f-1-spark:local}
+    container_name: glm53f-1-spark
+    environment:
+      # The launcher's options (gr8/KNOBS.md). These are the recipe: one box, the K2 release from Hugging Face, the
+      # 4-bit KV latent, the prompt cache in kv-store.yaml. README.md has why each value is what it is.
+      - TP=1
+      - PEERS=127.0.0.1
+      - MODEL=${MODEL:-https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4}
+      - VARIANT=k2
+      - KV_FORMAT=int4
+      - FLASH_CACHE=aligned
+      - KV_STORE=@/etc/gr8/kv-store.yaml
+      # one prefill lane: the second lane's scratch does not fit beside the weights at TP=1
+      - EXTRA_ARGS=--pf-lanes 1
+      - HF_TOKEN=${HF_TOKEN:-}
+      # the container's own paths
+      - GR8_WORK_DIR=/var/lib/gr8/home
+      - MODEL_CACHE=/var/lib/gr8/cache
+    # The front end (8100) and the supervisor's and engine's control ports (7340, 7341) on the box's own interfaces.
+    network_mode: host
+    # The launcher refuses to start next to another g6m4 on the box, and sees one started outside the container only in
+    # the host's process list.
+    pid: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ulimits:
+      memlock: -1
+      # A crash must not dump core: the engine maps ~90 GB, and the dumping thread holds the NVIDIA driver's lock the
+      # whole time it writes, which can leave the box unreachable until a power cycle.
+      core: 0
+    cap_drop: [ALL]
+    cap_add: [IPC_LOCK]
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=1g,mode=1777
+    oom_score_adj: 1000
+    init: true
+    stop_grace_period: 30s
+    volumes:
+      # The model: the K2 release's TP=1 part, about 85 GB, fetched from Hugging Face on the first boot. Set
+      # MODEL_CACHE_DIR to a host directory owned by uid 1000 to keep it outside docker.
+      - ${MODEL_CACHE_DIR:-cache}:/var/lib/gr8/cache
+      # The prompt cache (kv-store.yaml): checkpoints of prompts the box has prefilled, kept across restarts.
+      - ${PROMPT_CACHE_DIR:-prompts}:/var/lib/gr8/prompts
+      # Logs and state: out/supervisor.log, g6m4.r0.err, shim.log, front.log.
+      - ${GR8_HOME_DIR:-home}:/var/lib/gr8/home
+    healthcheck:
+      test: ["CMD", "/opt/gr8/gr8", "glm53f", "health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60m
+    restart: on-failure
+
+volumes:
+  cache:
+  prompts:
+  home:
