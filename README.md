@@ -50,9 +50,9 @@ One GX10 on kindling spark-os with the defaults, clocks uncapped, `gr8 glm53f be
 |---|---|
 | decode, one request (tok/s) | code 54.7, prose 29.3, structured 66.5 (MTP only: 32.4, 29.2, 32.1) |
 | decode, 4 / 8 requests at once | 57 / 59 tok/s in total |
-| prefill, 8K / 32K / 128K / 240K | 1,235 / 1,236 / 1,156 / 923 tok/s |
+| prefill, 8K / 32K / 128K / 240K | 1,172 / 1,222 / 1,156 / 923 tok/s (1,235 / 1,236 at 8K / 32K with `DFLASH=0`) |
 | time to first token, 32K / 240K | 26.7 s / 266 s cold; 0.25 s / 5.7 s from the prompt cache |
-| int4 KV against bf16 KV | KL mean 0.0049 (p95 0.026), top-1 98.1% |
+| int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
 | needle at 128K, count to 200 | pass |
 | lowest free memory, 240K prompt | 5.3 GiB |
 | boot | 45 s from the cache; first boot 8 min at 160 MB/s |
