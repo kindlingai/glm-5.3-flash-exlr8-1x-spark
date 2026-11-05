@@ -4,6 +4,16 @@ GLM-5.3-Flash on one ASUS GX10 / NVIDIA DGX Spark (GB10, 128 GB), served by [gr8
 from the K2 width of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
 int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache on disk.
 
+| | |
+|---|---|
+| hardware | one ASUS GX10 / DGX Spark (GB10, 128 GB) |
+| weights | exlr8 K2, 93 GB on the device |
+| KV pool | 262,208 tokens in all (int4, 2.9 GB), shared by the sessions (`CAP`) |
+| longest session | 262,194 tokens, prompt and output together (one past 32K runs alone, gr8's `SHARE_LIMIT`) |
+| sessions at once | 4 (a request alone drafts with DFlash2) |
+| decode, one request | 54.7 tok/s code, 29.3 prose, 66.5 structured |
+| prefill | about 1,200 tok/s to 32K, 923 at 240K |
+
 > Work in progress: the gr8 changes are in review (kindlingai/gr8#347, #348, #349, #352), and the submodule points at
 > their combined branch until they land.
 
@@ -29,7 +39,7 @@ In `.env` next to `compose.yaml` (see `.env.example`):
 
 | knob | default | |
 |---|---|---|
-| `CAP` | `262208` | KV reservation in tokens: the longest request (prompt + `max_tokens`) plus 64. About 15 KB of memory a token. |
+| `CAP` | `262208` | The KV pool in tokens, shared by the sessions. The longest session is `CAP` less the guard rows (14 with DFlash2, 2 without). About 15 KB of memory a token. |
 | `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 
