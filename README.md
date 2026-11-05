@@ -33,6 +33,11 @@ In `.env` next to `compose.yaml` (see `.env.example`):
 | `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 
+The image pins the weights to the Hugging Face commits measured below: the release at
+[`867580a`](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4/tree/867580abd28d142bb4c56218bb81a752b7dea988)
+and the drafter at [`bf582e4`](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2/tree/bf582e4eacc1810f76656d1811693ff6c6737d2a).
+Set `MODEL` or `DRAFTER` in `.env` to move them (`https://huggingface.co/<org>/<repo>@<commit>`).
+
 Any other gr8 option goes in `.env` the same way: [gr8/KNOBS.md](gr8/KNOBS.md) lists them, and
 [gr8/docs/FLASH.md](gr8/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a

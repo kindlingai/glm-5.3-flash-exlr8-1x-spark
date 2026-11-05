@@ -110,12 +110,14 @@ ENV PATH=/opt/glm53f-1x/bin:/opt/gr8/bin:$PATH PYTHONPATH=/opt/gr8/frontend HOME
 #   MENTAT  0: this box alone; 1: register with the mentat cluster (knobs.sh)
 ENV CAP=262208 DFLASH=1 MENTAT=0
 # The rest of the recipe, as gr8's launcher options (gr8/KNOBS.md)
+#   MODEL, DRAFTER: pinned to the Hugging Face commits measured here. The model cache is keyed by commit, so a new
+#   commit on either repo (even a README edit) changes nothing until these move.
 #   SESS:       four requests decode at once; a request alone drafts with DFlash2
 #   EXTRA_ARGS: one prefill lane, as the second lane's scratch does not fit beside the weights at TP=1
 #   EXTRA_ENV:  the boot keeps 6 GiB free (gr8's default 8 sits at the edge with the drafter at this CAP)
 ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=k2 KV_FORMAT=int4 FLASH_CACHE=aligned KV_STORE=@/etc/gr8/kv-store.yaml \
-    MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4 \
-    DRAFTER=https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2 \
+    MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4@867580abd28d142bb4c56218bb81a752b7dea988 \
+    DRAFTER=https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2@bf582e4eacc1810f76656d1811693ff6c6737d2a \
     EXTRA_ARGS="--pf-lanes 1" EXTRA_ENV="GR8_MEM_MIN=6"
 USER 1000:1000
 ENTRYPOINT ["/opt/glm53f-1x/entrypoint.sh"]
