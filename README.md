@@ -12,9 +12,6 @@ from the K2 width of the exlr8 release
   the box is not using, which the kernel takes back whenever it needs it (`kv-store.yaml`).
 - **Boot from Hugging Face**: the first boot downloads the box's part of the release (85 GB) into the model cache.
 
-The [glm-5.3-flash-exlr8-gx10](https://github.com/kindlingai/glm-5.3-flash-exlr8-gx10) recipe serves the same weights
-on vLLM at TP=1 to TP=4.
-
 ## Running it
 
 ```bash
