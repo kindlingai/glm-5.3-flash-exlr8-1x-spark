@@ -1,7 +1,7 @@
 # GLM-5.3-Flash on one GB10 box: gr8 (the gr8/ submodule) with only the engine this recipe runs, g6m4_flash-int4 at
 # TP=1, plus the front end, the loader and the launcher. linux/arm64, CUDA 13, sm_121a.
 #
-#   docker buildx build --platform linux/arm64 -t glm53f-1-spark .      (compose.yaml builds it the same way)
+#   docker buildx build --platform linux/arm64 -t glm53f-1x-spark .      (compose.yaml builds it the same way)
 #
 # The stages are gr8's own Dockerfile cut down to one engine: gr8's builds every engine for every TP width, which takes
 # far longer. Keep the two in step when the submodule moves (toolchain, Rust pin, XGrammar, runtime packages).
@@ -96,11 +96,25 @@ COPY --from=libs /out/g6load /out/kvman-remote bin/
 COPY --from=libs /out/libgr8knobs.so bin/lib/
 COPY --from=front /out/g6front-rs bin/
 COPY kv-store.yaml /etc/gr8/kv-store.yaml
+COPY entrypoint.sh knobs.sh /opt/glm53f-1x/
+COPY bin/gr8 /opt/glm53f-1x/bin/gr8
 # The container runs as uid 1000 on a read-only image. Its writable state is three volumes (compose.yaml): the model
 # cache, the prompt cache and GR8_WORK_DIR, which docker fills from these empty, uid-1000 directories on first use.
 RUN mkdir -p /var/lib/gr8/home /var/lib/gr8/cache /var/lib/gr8/prompts \
  && chown 1000:1000 /var/lib/gr8/home /var/lib/gr8/cache /var/lib/gr8/prompts
-ENV PATH=/opt/gr8/bin:$PATH PYTHONPATH=/opt/gr8/frontend HOME=/tmp GR8_CONTAINER=1 GR8_MODEL=glm53f \
+ENV PATH=/opt/glm53f-1x/bin:/opt/gr8/bin:$PATH PYTHONPATH=/opt/gr8/frontend HOME=/tmp GR8_CONTAINER=1 GR8_MODEL=glm53f \
     GR8_WORK_DIR=/var/lib/gr8/home MODEL_CACHE=/var/lib/gr8/cache PY=/usr/bin/python3 FRONT_BIN=/opt/gr8/bin/g6front-rs
+# The recipe's knobs (README.md, "Knobs"). Set any of them in .env, or with docker run -e, to override.
+#   CAP     the KV reservation in tokens: a request's prompt plus max_tokens, plus a page for the guard rows
+#   DFLASH  1: a request alone drafts with the DFlash2 drafter (fetched and converted on the first boot); 0: MTP only
+#   MENTAT  0: this box alone; 1: register with the mentat cluster (knobs.sh)
+ENV CAP=262208 DFLASH=1 MENTAT=0
+# The rest of the recipe, as gr8's launcher options (gr8/KNOBS.md)
+#   EXTRA_ARGS: one prefill lane, as the second lane's scratch does not fit beside the weights at TP=1
+#   EXTRA_ENV:  the boot keeps 6 GiB free (gr8's default 8 sits at the edge with the drafter at this CAP)
+ENV TP=1 GROUP=gr8-glm53f-1x VARIANT=k2 KV_FORMAT=int4 FLASH_CACHE=aligned KV_STORE=@/etc/gr8/kv-store.yaml \
+    MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4 \
+    DRAFTER=https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2 \
+    EXTRA_ARGS="--pf-lanes 1" EXTRA_ENV="GR8_MEM_MIN=6"
 USER 1000:1000
-ENTRYPOINT ["/opt/gr8/docker/entrypoint.sh"]
+ENTRYPOINT ["/opt/glm53f-1x/entrypoint.sh"]

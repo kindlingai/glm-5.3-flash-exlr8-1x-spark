@@ -2,33 +2,23 @@
 #
 #   docker compose up -d --build        # builds the image, fetches the model from Hugging Face, serves on port 8100
 #   docker compose logs -f              # the supervisor; ready when it prints that the cluster serves
-#   docker compose exec gr8 /opt/gr8/gr8 glm53f smoke
+#   docker compose exec gr8 gr8 glm53f smoke
 #
 # .env (optional, .env.example) overrides the settings below. Compose reads it from this file's directory.
-name: glm53f-1-spark
+name: glm53f-1x-spark
 services:
   gr8:
     build:
       context: .
-    image: ${IMAGE:-glm53f-1-spark:local}
-    container_name: glm53f-1-spark
+    image: ${IMAGE:-glm53f-1x-spark:local}
+    container_name: glm53f-1x-spark
+    # The knobs (CAP, DFLASH, MENTAT; README.md) and any other gr8 option come from .env. Unset, the image's defaults
+    # apply (Dockerfile).
+    env_file:
+      - path: .env
+        required: false
     environment:
-      # The launcher's options (gr8/KNOBS.md). These are the recipe: one box, the K2 release from Hugging Face, the
-      # 4-bit KV latent, the prompt cache in kv-store.yaml. README.md has why each value is what it is.
-      - TP=1
-      - PEERS=127.0.0.1
-      - MODEL=${MODEL:-https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4}
-      - VARIANT=k2
-      # The DFlash2 drafter (CC BY-NC-ND 4.0): the first boot downloads it and converts it for this box, into the model
-      # cache. A request alone on the box drafts with it; set DRAFTER= empty in .env for MTP only.
-      - DRAFTER=${DRAFTER-https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2}
-      - KV_FORMAT=int4
-      - FLASH_CACHE=aligned
-      - KV_STORE=@/etc/gr8/kv-store.yaml
-      # one prefill lane: the second lane's scratch does not fit beside the weights at TP=1
-      - EXTRA_ARGS=--pf-lanes 1
-      - HF_TOKEN=${HF_TOKEN:-}
-      # the container's own paths
+      # the container's own paths, so a line in .env cannot point the launcher outside the volumes
       - GR8_WORK_DIR=/var/lib/gr8/home
       - MODEL_CACHE=/var/lib/gr8/cache
     # The front end (8100) and the supervisor's and engine's control ports (7340, 7341) on the box's own interfaces.
@@ -67,7 +57,7 @@ services:
       # Logs and state: out/supervisor.log, g6m4.r0.err, shim.log, front.log.
       - ${GR8_HOME_DIR:-home}:/var/lib/gr8/home
     healthcheck:
-      test: ["CMD", "/opt/gr8/gr8", "glm53f", "health"]
+      test: ["CMD", "/opt/glm53f-1x/bin/gr8", "glm53f", "health"]
       interval: 30s
       timeout: 5s
       start_period: 60m
