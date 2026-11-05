@@ -1,6 +1,7 @@
 # GLM-5.3-Flash on one GB10 box (ASUS GX10 / DGX Spark): gr8, the K2 exlr8 release, int4 KV, a prompt cache on disk.
 #
-#   docker compose up -d --build        # builds the image, fetches the model from Hugging Face, serves on port 8100
+#   docker compose up -d                # pulls the image (CI publishes it), fetches the model, serves on port 8100
+#   docker compose up -d --build        # or builds the image here from the gr8 submodule
 #   docker compose logs -f              # the supervisor; ready when it prints that the cluster serves
 #   docker compose exec gr8 gr8 glm53f smoke
 #
@@ -10,7 +11,7 @@ services:
   gr8:
     build:
       context: .
-    image: ${IMAGE:-glm53f-1x-spark:local}
+    image: ${IMAGE:-ghcr.io/kindlingai/glm-5.3-flash-exlr8-1x-spark:latest}
     container_name: glm53f-1x-spark
     # The knobs (CAP, DFLASH, MENTAT; README.md) and any other gr8 option come from .env. Unset, the image's defaults
     # apply (Dockerfile).

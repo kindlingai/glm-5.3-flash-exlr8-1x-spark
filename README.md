@@ -12,10 +12,13 @@ int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache
 ```bash
 git clone --recurse-submodules https://github.com/kindlingai/glm-5.3-flash-exlr8-1x-spark
 cd glm-5.3-flash-exlr8-1x-spark
-docker compose up -d --build
+docker compose up -d          # the published image, ghcr.io/kindlingai/glm-5.3-flash-exlr8-1x-spark
 docker compose logs -f
 docker compose exec gr8 gr8 glm53f smoke
 ```
+
+`docker compose up -d --build` builds the image on the box instead (about 30 minutes cold). CI builds every push and
+publishes main as `latest`, each commit as `sha-<commit>`, and each tag under its name (`.github/workflows/image.yml`).
 
 The API is OpenAI's on port 8100. The first boot downloads 87 GB from Hugging Face (the model and the drafter) and
 converts the drafter; later boots take about 45 s. Stop any other model on the box first: the weights take 93 GB.
