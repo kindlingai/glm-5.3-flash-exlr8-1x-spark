@@ -19,6 +19,9 @@ services:
       - PEERS=127.0.0.1
       - MODEL=${MODEL:-https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4}
       - VARIANT=k2
+      # The DFlash2 drafter (CC BY-NC-ND 4.0): the first boot downloads it and converts it for this box, into the model
+      # cache. A request alone on the box drafts with it; set DRAFTER= empty in .env for MTP only.
+      - DRAFTER=${DRAFTER-https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2}
       - KV_FORMAT=int4
       - FLASH_CACHE=aligned
       - KV_STORE=@/etc/gr8/kv-store.yaml
