@@ -111,6 +111,6 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
 | lowest free memory | 3.9 GiB on Kindling Spark OS under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
 | a 672K prompt (with `MAX_MODEL_LEN` raised) | 901 s to the first token, 16 tok/s decode after it, 2.7 s from the prompt cache |
-| boot | 45 s from the cache. The first boot downloads 85 GB at about 160 MB/s (8 min) and converts the drafter in 5 s |
+| boot | 45 s from the cache. The first boot downloads the 85 GB model at about 160 MB/s (8 min), then the 2.3 GB drafter, and converts the drafter in 5 s |
 
 The GPU reaches 90 C in a 128K prefill, and the bench then holds it at 1,800 MHz, so the long prefills are partly capped.
