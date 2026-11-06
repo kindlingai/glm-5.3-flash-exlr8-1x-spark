@@ -2,7 +2,7 @@
   "version": 1,
   "title": "GLM-5.3-Flash",
   "variant": "exlr8 K2, int4 KV",
-  "summary": "GLM-5.3-Flash on one GB10 with gr8: the K2 exlr8 release, int4 KV, DFlash2 for a request alone, four sessions sharing a 262K-token KV pool, and a prompt cache on disk.",
+  "summary": "GLM-5.3-Flash on one GB10 with gr8: the K2 exlr8 release, int4 KV, DFlash2 for a request alone, four sessions sharing a 700K-token KV pool, and a prompt cache on disk.",
   "model": "kindlingai/glm-5.3-flash-exlr8-k2-k3-k4",
   "hardware": "ASUS GX10 / DGX Spark (GB10)",
   "stack": [
@@ -18,53 +18,53 @@
       "label": "TP=1",
       "nodes": 1,
       "decode": {
-        "code": 53.1,
-        "prose": 29.2,
-        "structured": 66.3
+        "code": 52.9,
+        "prose": 29.0,
+        "structured": 65.3
       },
       "prefill": [
         {
           "context": 8192,
-          "tps": 1186
+          "tps": 1174
         },
         {
           "context": 32768,
-          "tps": 1219
+          "tps": 1207
         },
         {
           "context": 131072,
-          "tps": 1066
+          "tps": 1023
         }
       ],
       "concurrency": [
         {
           "streams": 1,
-          "aggregate_tps": 38.4
+          "aggregate_tps": 38.2
         },
         {
           "streams": 2,
-          "aggregate_tps": 41.2
+          "aggregate_tps": 41.1
         },
         {
           "streams": 4,
-          "aggregate_tps": 57.1
+          "aggregate_tps": 57.3
         },
         {
           "streams": 8,
-          "aggregate_tps": 59.7
+          "aggregate_tps": 59.0
         }
       ],
-      "max_context": 262194,
-      "kv_pool_tokens": 262208,
+      "max_context": 262144,
+      "kv_pool_tokens": 700032,
       "max_concurrent": 4,
       "quality": [
         {
-          "name": "Needle at 128K",
-          "value": "found in 3 of 4 runs"
-        },
-        {
           "name": "int4 vs bf16 KV",
           "value": "top-1 12/12 after 8K and 32K prefills"
+        },
+        {
+          "name": "Needle recall",
+          "value": "found at 128K (7 of 7 runs)"
         }
       ]
     }
