@@ -45,12 +45,15 @@ In `.env` next to `compose.yaml` (see `.env.example`):
 | `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. A request left alone when the others finish switches to it after 256 tokens of MTP. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 
+`CAP` was tuned on a standard DGX OS install. If you are running Kindling Spark OS (https://github.com/kindlingai/kindling-spark-os)
+you may be able to raise `CAP` to `1000000`.
+
 The image pins the weights to the Hugging Face commits measured below: the release at
 [`867580a`](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4/tree/867580abd28d142bb4c56218bb81a752b7dea988)
 and the drafter at [`bf582e4`](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2/tree/bf582e4eacc1810f76656d1811693ff6c6737d2a).
-Set `MODEL` or `DRAFTER` in `.env` to move them (`https://huggingface.co/<org>/<repo>@<commit>`).
+Set `MODEL` or `DRAFTER` in `.env` as needed (`https://huggingface.co/<org>/<repo>@<commit>`).
 
-Any other gr8 option goes in `.env` the same way: [gr8/KNOBS.md](gr8/KNOBS.md) lists them, and
+Advanced `gr8` options can be specified `.env` as well: [gr8/KNOBS.md](gr8/KNOBS.md) lists them, and
 [gr8/docs/FLASH.md](gr8/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a
 5 GiB boot floor (`Dockerfile`).
@@ -73,8 +76,6 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | weights on the device | 93.4 GB (K2) |
 | KV pool | 700,032 tokens (int4 latent and pooled indexer keys, 3.5 GB), shared by up to 4 sessions; a request past 32K decodes alone (gr8's `SHARE_LIMIT`) |
 | longest request | 262,144 tokens, prompt and output together (`MAX_MODEL_LEN`) |
-| decode, MTP only (`DFLASH=0`) | code 32.4, prose 29.2, structured 32.1 tok/s |
-| prefill, 240K prompt | 923 tok/s, 266 s to the first token |
 | from the prompt cache | 32K prompt 0.25 s and 240K prompt 5.7 s to the first token |
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
 | lowest free memory | 3.9 GiB on kindling spark-os under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
