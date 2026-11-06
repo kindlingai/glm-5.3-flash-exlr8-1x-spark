@@ -124,5 +124,7 @@ ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=k2 KV_FORMAT=int4 FLASH_CACHE=aligne
 # repeated-tool-call guard (a reply that makes the same call with the same result again is resampled). A request's own
 # presence_penalty / thinking_presence_penalty / tool_repeat_guard wins.
 ENV DEFAULT_PRESENCE_PENALTY="thinking=0.5,greedy=0.2,nongreedy=0" TOOL_REPEAT_GUARD=1
+# A soft thinking budget: past half of the request's max_tokens, </think> gains 2 logits per 1,000 thinking tokens, up to 10
+ENV DEFAULT_THINK_END_BOOST="start=0.5x,per1k=2,max=10"
 USER 1000:1000
 ENTRYPOINT ["/opt/glm53f-1x/entrypoint.sh"]
