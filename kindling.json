@@ -18,40 +18,40 @@
       "label": "TP=1",
       "nodes": 1,
       "decode": {
-        "code": 52.9,
-        "prose": 29.0,
-        "structured": 65.3
+        "code": 54.3,
+        "prose": 29.1,
+        "structured": 66.0
       },
       "prefill": [
         {
           "context": 8192,
-          "tps": 1174
+          "tps": 1214
         },
         {
           "context": 32768,
-          "tps": 1207
+          "tps": 1224
         },
         {
           "context": 131072,
-          "tps": 1023
+          "tps": 1048
         }
       ],
       "concurrency": [
         {
           "streams": 1,
-          "aggregate_tps": 38.2
+          "aggregate_tps": 40.8
         },
         {
           "streams": 2,
-          "aggregate_tps": 41.1
+          "aggregate_tps": 44.1
         },
         {
           "streams": 4,
-          "aggregate_tps": 57.3
+          "aggregate_tps": 58.0
         },
         {
           "streams": 8,
-          "aggregate_tps": 59.0
+          "aggregate_tps": 59.2
         }
       ],
       "max_context": 262144,
@@ -64,7 +64,7 @@
         },
         {
           "name": "Needle recall",
-          "value": "found at 128K (7 of 7 runs)"
+          "value": "found at 128K (8 of 8 runs)"
         }
       ]
     }
