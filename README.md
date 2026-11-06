@@ -10,6 +10,8 @@ int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache
 
 ![Four requests decoding at once on one GB10, at 2x speed](docs/concurrency-4.gif)
 
+*Four requests decoding at once on one GB10, played at 2x speed.*
+
 ## Quickstart
 
 On the Spark, with Docker and the NVIDIA container toolkit (both come with DGX OS), run the published image:
@@ -82,8 +84,8 @@ The image pins the weights to the Hugging Face commits measured below: the relea
 and the drafter at [`bf582e4`](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2/tree/bf582e4eacc1810f76656d1811693ff6c6737d2a).
 Set `MODEL` or `DRAFTER` in `.env` as needed (`https://huggingface.co/<org>/<repo>@<commit>`).
 
-Advanced `gr8` options can be specified `.env` as well: [gr8/KNOBS.md](gr8/KNOBS.md) lists them, and
-[gr8/docs/FLASH.md](gr8/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
+Advanced `gr8` options can be specified in `.env` as well: [gr8/KNOBS.md](https://github.com/kindlingai/gr8/blob/65d1cb21036c1e77a1484f30ff23fd7d3c7be70a/KNOBS.md) lists them, and
+[gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/65d1cb21036c1e77a1484f30ff23fd7d3c7be70a/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a
 5 GiB boot floor (`Dockerfile`).
 
@@ -98,7 +100,7 @@ stays in RAM the box is not using, which the kernel takes back when it needs it.
 
 The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.json`; regenerate it with
 `python3 gr8/bench/bench.py kindling REPORT.json --out kindling.json --config-id tp1`, from kindlingai/gr8#354). The rest, from the same box
-(one GX10 on kindling spark-os, clocks uncapped, the bench cooling to 55 C before each stage):
+(one GX10 on Kindling Spark OS, clocks uncapped, the bench cooling to 55 C before each stage):
 
 | | |
 |---|---|
@@ -107,7 +109,7 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | longest request | 262,144 tokens, prompt and output together (`MAX_MODEL_LEN`) |
 | from the prompt cache | 32K prompt 0.25 s and 240K prompt 5.7 s to the first token |
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
-| lowest free memory | 3.9 GiB on kindling spark-os under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
+| lowest free memory | 3.9 GiB on Kindling Spark OS under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
 | a 672K prompt (with `MAX_MODEL_LEN` raised) | 901 s to the first token, 16 tok/s decode after it, 2.7 s from the prompt cache |
 | boot | 45 s from the cache. The first boot downloads 85 GB at about 160 MB/s (8 min) and converts the drafter in 5 s |
 
