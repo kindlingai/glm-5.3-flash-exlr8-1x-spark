@@ -8,18 +8,22 @@ int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache
 
 ![Four requests decoding at once on one GB10, at 2x speed](docs/concurrency-4.gif)
 
-## Run it
+## Quickstart
+
+On the Spark, with Docker and the NVIDIA container toolkit (both come with DGX OS), run the published image:
 
 ```bash
-git clone --recurse-submodules https://github.com/kindlingai/glm-5.3-flash-exlr8-1x-spark
-cd glm-5.3-flash-exlr8-1x-spark
-docker compose up -d          # the published image, ghcr.io/kindlingai/glm-5.3-flash-exlr8-1x-spark
-docker compose logs -f
-docker compose exec gr8 gr8 glm53f smoke
+docker run -d --name glm53f-1x-spark --gpus all --network host --pid host \
+  --ulimit memlock=-1 --ulimit core=0 --cap-drop ALL --cap-add IPC_LOCK \
+  --security-opt no-new-privileges --read-only --tmpfs /tmp:size=1g,mode=1777 --init --oom-score-adj 1000 \
+  -v glm53f-cache:/var/lib/gr8/cache -v glm53f-prompts:/var/lib/gr8/prompts -v glm53f-home:/var/lib/gr8/home \
+  ghcr.io/kindlingai/glm-5.3-flash-exlr8-1x-spark:latest
+docker logs -f glm53f-1x-spark     # ready at "serving: http://..."
 ```
 
-`docker compose up -d --build` builds the image on the box instead (about 30 minutes cold). CI builds every push and
-publishes main as `latest`, each commit as `sha-<commit>`, and each tag under its name (`.github/workflows/image.yml`).
+The first boot downloads 87 GB from Hugging Face into the `glm53f-cache` volume (the model and the drafter) and
+converts the drafter, which takes about 10 minutes. Later boots take about 50 s. Stop any other model on the box first:
+the weights take 93 GB.
 
 The API is OpenAI's on port 8100, and the model's name is `glm-5.3-flash` (`glm53f` also works):
 
@@ -27,16 +31,39 @@ The API is OpenAI's on port 8100, and the model's name is `glm-5.3-flash` (`glm5
 curl -s localhost:8100/v1/chat/completions -H 'Content-Type: application/json' -d '{
   "model": "glm-5.3-flash",
   "messages": [{"role": "user", "content": "Write a haiku about a small computer."}],
-  "max_tokens": 512
+  "max_tokens": 4096
 }'
 ```
 
-The first boot downloads 87 GB from Hugging Face (the model and the drafter) and
-converts the drafter; later boots take about 45 s. Stop any other model on the box first: the weights take 93 GB.
+The model thinks before it answers. The thinking comes back in `message.reasoning` and counts toward `max_tokens`:
+this haiku took about 1,700 tokens, so a small `max_tokens` can end before `message.content` starts.
+
+```bash
+docker exec glm53f-1x-spark gr8 glm53f smoke   # 14 checks against the API
+docker stop glm53f-1x-spark && docker rm glm53f-1x-spark
+```
+
+Set a knob (below) with `-e`, for example `-e CAP=262208`. `:latest` is main. Each commit is also published as
+`sha-<commit>`, and each tag under its name.
+
+## Run it with compose
+
+`compose.yaml` runs the same image with the same settings, and reads the knobs from `.env`:
+
+```bash
+git clone --recurse-submodules https://github.com/kindlingai/glm-5.3-flash-exlr8-1x-spark
+cd glm-5.3-flash-exlr8-1x-spark
+docker compose up -d
+docker compose logs -f
+docker compose exec gr8 gr8 glm53f smoke
+```
+
+`docker compose up -d --build` builds the image on the box instead (about 30 minutes cold). CI builds every push
+(`.github/workflows/image.yml`).
 
 ## Knobs
 
-In `.env` next to `compose.yaml` (see `.env.example`):
+In `.env` next to `compose.yaml` (see `.env.example`), or with `docker run -e`:
 
 | knob | default | |
 |---|---|---|
@@ -74,12 +101,12 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | | |
 |---|---|
 | weights on the device | 93.4 GB (K2) |
-| KV pool | 700,032 tokens (int4 latent and pooled indexer keys, 3.5 GB), shared by up to 4 sessions; a request past 32K decodes alone (gr8's `SHARE_LIMIT`) |
+| KV pool | 700,032 tokens (int4 latent and pooled indexer keys, 3.5 GB), shared by up to 4 sessions. A request past 32K decodes alone (gr8's `SHARE_LIMIT`) |
 | longest request | 262,144 tokens, prompt and output together (`MAX_MODEL_LEN`) |
 | from the prompt cache | 32K prompt 0.25 s and 240K prompt 5.7 s to the first token |
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
 | lowest free memory | 3.9 GiB on kindling spark-os under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
 | a 672K prompt (with `MAX_MODEL_LEN` raised) | 901 s to the first token, 16 tok/s decode after it, 2.7 s from the prompt cache |
-| boot | 45 s from the cache; the first boot downloads 85 GB at about 160 MB/s (8 min) and converts the drafter in 5 s |
+| boot | 45 s from the cache. The first boot downloads 85 GB at about 160 MB/s (8 min) and converts the drafter in 5 s |
 
 The GPU reaches 90 C in a 128K prefill, and the bench then holds it at 1,800 MHz, so the long prefills are partly capped.
