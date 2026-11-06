@@ -33,7 +33,8 @@ In `.env` next to `compose.yaml` (see `.env.example`):
 
 | knob | default | |
 |---|---|---|
-| `CAP` | `262208` | The KV pool in tokens, shared by the sessions. The longest session is `CAP` less the guard rows (14 with DFlash2, 2 without). About 15 KB of memory a token. |
+| `CAP` | `700032` | The KV pool in tokens, shared by the sessions: admission reserves each request's prompt + `max_tokens` from it. About 5 KB of memory a token. |
+| `MAX_MODEL_LEN` | `262144` | The longest single request, prompt and output together. At most `CAP` less the guard rows (14 with DFlash2). |
 | `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 
@@ -63,13 +64,14 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | | |
 |---|---|
 | weights on the device | 93.4 GB (K2) |
-| KV pool | 262,208 tokens (int4, 2.9 GB), shared by up to 4 sessions; one past 32K runs alone (gr8's `SHARE_LIMIT`) |
-| longest session | 262,194 tokens, prompt and output together |
+| KV pool | 700,032 tokens (int4 latent and pooled indexer keys, 3.5 GB), shared by up to 4 sessions; a request past 32K decodes alone (gr8's `SHARE_LIMIT`) |
+| longest request | 262,144 tokens, prompt and output together (`MAX_MODEL_LEN`) |
 | decode, MTP only (`DFLASH=0`) | code 32.4, prose 29.2, structured 32.1 tok/s |
 | prefill, 240K prompt | 923 tok/s, 266 s to the first token |
 | from the prompt cache | 32K prompt 0.25 s and 240K prompt 5.7 s to the first token |
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
-| lowest free memory | 5.3 GiB under a 240K prompt |
+| lowest free memory | 3.9 GiB on kindling spark-os under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
+| a 672K prompt (with `MAX_MODEL_LEN` raised) | 901 s to the first token, 16 tok/s decode after it, 2.7 s from the prompt cache |
 | boot | 45 s from the cache; the first boot downloads 85 GB at about 160 MB/s (8 min) and converts the drafter in 5 s |
 
 The GPU reaches 90 C in a 128K prefill, and the bench then holds it at 1,800 MHz, so the long prefills are partly capped.
