@@ -75,6 +75,7 @@ In `.env` next to `compose.yaml` (see `.env.example`), or with `docker run -e`:
 | `MAX_MODEL_LEN` | `262144` | The longest single request, prompt and output together. At most `CAP` less the guard rows (14 with DFlash2). |
 | `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. A request left alone when the others finish switches to it after 256 tokens of MTP. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
+| `DEFAULT_PRESENCE_PENALTY` | `greedy=0.2,greedy.thinking=0.5` | For greedy requests (temperature 0) only: a presence penalty of 0.2 on the reply and 0.7 inside the think block. Greedy decoding on this K2 quant can fall into exact repeats, such as the same tool call turn after turn. Sampling requests get none. A request's own `presence_penalty` is added on top. `0` turns it off. The format is in gr8's KNOBS.md. |
 
 `CAP` was tuned on a standard DGX OS install. If you are running Kindling Spark OS (https://github.com/kindlingai/kindling-spark-os)
 you may be able to raise `CAP` to `1000000`.
@@ -84,8 +85,8 @@ The image pins the weights to the Hugging Face commits measured below: the relea
 and the drafter at [`bf582e4`](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2/tree/bf582e4eacc1810f76656d1811693ff6c6737d2a).
 Set `MODEL` or `DRAFTER` in `.env` as needed (`https://huggingface.co/<org>/<repo>@<commit>`).
 
-Advanced `gr8` options can be specified in `.env` as well: [gr8/KNOBS.md](https://github.com/kindlingai/gr8/blob/65d1cb21036c1e77a1484f30ff23fd7d3c7be70a/KNOBS.md) lists them, and
-[gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/65d1cb21036c1e77a1484f30ff23fd7d3c7be70a/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
+Advanced `gr8` options can be specified in `.env` as well: [gr8/KNOBS.md](https://github.com/kindlingai/gr8/blob/b887747/KNOBS.md) lists them, and
+[gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/b887747/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a
 5 GiB boot floor (`Dockerfile`).
 
