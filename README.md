@@ -8,9 +8,6 @@ int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache
 
 ![Four requests decoding at once on one GB10, at 2x speed](docs/concurrency-4.gif)
 
-> Work in progress: the gr8 changes are in review (kindlingai/gr8#347, #348, #349, #352), and the submodule points at
-> their combined branch until they land.
-
 ## Run it
 
 ```bash
@@ -24,7 +21,17 @@ docker compose exec gr8 gr8 glm53f smoke
 `docker compose up -d --build` builds the image on the box instead (about 30 minutes cold). CI builds every push and
 publishes main as `latest`, each commit as `sha-<commit>`, and each tag under its name (`.github/workflows/image.yml`).
 
-The API is OpenAI's on port 8100. The first boot downloads 87 GB from Hugging Face (the model and the drafter) and
+The API is OpenAI's on port 8100, and the model's name is `glm-5.3-flash` (`glm53f` also works):
+
+```bash
+curl -s localhost:8100/v1/chat/completions -H 'Content-Type: application/json' -d '{
+  "model": "glm-5.3-flash",
+  "messages": [{"role": "user", "content": "Write a haiku about a small computer."}],
+  "max_tokens": 512
+}'
+```
+
+The first boot downloads 87 GB from Hugging Face (the model and the drafter) and
 converts the drafter; later boots take about 45 s. Stop any other model on the box first: the weights take 93 GB.
 
 ## Knobs
@@ -35,7 +42,7 @@ In `.env` next to `compose.yaml` (see `.env.example`):
 |---|---|---|
 | `CAP` | `700032` | The KV pool in tokens, shared by the sessions: admission reserves each request's prompt + `max_tokens` from it. About 5 KB of memory a token. |
 | `MAX_MODEL_LEN` | `262144` | The longest single request, prompt and output together. At most `CAP` less the guard rows (14 with DFlash2). |
-| `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. `0`: MTP only, nothing downloaded. |
+| `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. A request left alone when the others finish switches to it after 256 tokens of MTP. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 
 The image pins the weights to the Hugging Face commits measured below: the release at
@@ -46,7 +53,7 @@ Set `MODEL` or `DRAFTER` in `.env` to move them (`https://huggingface.co/<org>/<
 Any other gr8 option goes in `.env` the same way: [gr8/KNOBS.md](gr8/KNOBS.md) lists them, and
 [gr8/docs/FLASH.md](gr8/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a
-6 GiB boot floor (`Dockerfile`).
+5 GiB boot floor (`Dockerfile`).
 
 ## The prompt cache
 
