@@ -28,18 +28,19 @@ FROM rust AS libs
 COPY gr8/engine/knobs-rs engine/knobs-rs
 COPY gr8/knobs knobs
 COPY gr8/engine/loader-rs engine/loader-rs
+COPY gr8/engine/Cargo.toml gr8/engine/Cargo.lock engine/
+COPY gr8/engine/hostcore-rs engine/hostcore-rs
 COPY gr8/engine/kvman-rs engine/kvman-rs
 COPY gr8/engine/scheduler-rs engine/scheduler-rs
 RUN mkdir -p /out \
  && cargo build --release --locked --manifest-path engine/loader-rs/Cargo.toml \
- && cargo build --release --locked --manifest-path engine/kvman-rs/Cargo.toml \
- && cargo build --release --locked --manifest-path engine/scheduler-rs/Cargo.toml \
+ && cargo build --release --locked --manifest-path engine/Cargo.toml \
  && cargo build --release --locked --features capi --manifest-path engine/knobs-rs/Cargo.toml \
+ && cargo rustc --release --locked --features capi --lib --crate-type cdylib --manifest-path engine/knobs-rs/Cargo.toml \
  && cp engine/loader-rs/target/release/libg6load.a engine/loader-rs/target/release/g6load \
-       engine/kvman-rs/target/release/libg6kvman.a engine/kvman-rs/target/release/kvman-remote \
-       engine/scheduler-rs/target/release/libg6sched.a \
+       engine/target/release/libg6host.a engine/target/release/kvman-remote \
        engine/knobs-rs/target/release/libgr8knobs.a engine/knobs-rs/target/release/libgr8knobs.so /out/ \
- && rm -rf engine/*/target
+ && rm -rf engine/target engine/*/target
 
 FROM rust AS front
 # hadolint ignore=DL3008
@@ -73,8 +74,7 @@ COPY gr8/engine engine
 COPY gr8/tools/health/gpuprobe.cu tools/health/gpuprobe.cu
 COPY gr8/scripts/build.sh scripts/build.sh
 COPY --from=libs /out/libg6load.a engine/loader-rs/target/release/libg6load.a
-COPY --from=libs /out/libg6kvman.a engine/kvman-rs/target/release/libg6kvman.a
-COPY --from=libs /out/libg6sched.a engine/scheduler-rs/target/release/libg6sched.a
+COPY --from=libs /out/libg6host.a engine/target/release/libg6host.a
 COPY --from=libs /out/libgr8knobs.a engine/knobs-rs/target/release/libgr8knobs.a
 COPY --from=front /out-xgrammar /opt/xgrammar
 COPY --from=xgrammar /out/libxgrammar.a /opt/xgrammar-lib/libxgrammar.a
