@@ -1,6 +1,6 @@
 # KindlingAI: GLM-5.3-Flash EXLR8 on one DGX Spark
 
-_**Join our discord to learn more about KindlingAI and `gr8`: https://discord.gg/VmsM9GWqZ**_
+_**Join our discord to learn more about KindlingAI and `gr8`: https://discord.gg/8EAvYPV2rE**_
 
 GLM-5.3-Flash on one DGX Spark (GB10, 128 GB), served by [gr8](https://github.com/kindlingai/gr8)
 from the K2 width of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
