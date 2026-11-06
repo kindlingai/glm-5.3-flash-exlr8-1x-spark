@@ -120,5 +120,9 @@ ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=k2 KV_FORMAT=int4 FLASH_CACHE=aligne
     MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4@867580abd28d142bb4c56218bb81a752b7dea988 \
     DRAFTER=https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2@bf582e4eacc1810f76656d1811693ff6c6737d2a \
     EXTRA_ARGS="--pf-lanes 1" EXTRA_ENV="GR8_MEM_MIN=5"
+# Repetition: a mild presence penalty inside the think block, a milder one on the whole reply, and the front end's
+# repeated-tool-call guard (a reply that makes the same call with the same result again is resampled). A request's own
+# presence_penalty / thinking_presence_penalty / tool_repeat_guard wins.
+ENV DEFAULT_THINKING_PRESENCE_PENALTY=0.5 DEFAULT_PRESENCE_PENALTY=0.2 TOOL_REPEAT_GUARD=1
 USER 1000:1000
 ENTRYPOINT ["/opt/glm53f-1x/entrypoint.sh"]
