@@ -1,6 +1,6 @@
-# GLM-5.3-Flash exlr8 on one Spark
+# KindlingAI: GLM-5.3-Flash EXLR8 on one DGX Spark
 
-GLM-5.3-Flash on one ASUS GX10 / NVIDIA DGX Spark (GB10, 128 GB), served by [gr8](https://github.com/kindlingai/gr8)
+GLM-5.3-Flash on one DGX Spark (GB10, 128 GB), served by [gr8](https://github.com/kindlingai/gr8)
 from the K2 width of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
 int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache on disk.
 
