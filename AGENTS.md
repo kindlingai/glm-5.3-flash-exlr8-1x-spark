@@ -98,7 +98,7 @@ The commands below use `TUNE=speed`: put in the value you picked.
    ```
 
    The first boot downloads 87 GB from Hugging Face into the `glm53f-cache` volume (the model and the drafter) and
-   converts the drafter: README.md gives about 10 minutes in all, and about 50 s for later boots. With `mentat`, add
+   converts the drafter: README.md gives about 10 minutes in all, and about 45 s for later boots. With `mentat`, add
    `-e MENTAT=1`.
 
    Or with compose:
