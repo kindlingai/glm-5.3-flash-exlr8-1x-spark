@@ -1,4 +1,5 @@
 # KindlingAI: GLM-5.3-Flash EXLR8 on one DGX Spark
+**If you are an agent booting this for someone: read [AGENTS.md](AGENTS.md) first, then the Quickstart.**
 
 _**Join our discord to learn more about KindlingAI and `gr8`: https://discord.gg/8EAvYPV2rE**_
 
@@ -11,6 +12,15 @@ int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache
 ![Four requests decoding at once on one GB10, at 2x speed](docs/concurrency-4.gif)
 
 *Four requests decoding at once on one GB10, played at 2x speed.*
+
+Pick what to prioritize with one setting, `TUNE`:
+
+- `TUNE=speed` (the default): one request writes code at 54.2 tok/s, and a request can be up to 262,144 tokens.
+- `TUNE=context`: one request up to 700,018 tokens. A 672K-token prompt took 901 s to the first token, then decoded
+  at 16 tok/s.
+- `TUNE=quality`: the same as `speed`. K2 is the one width of the release that fits one box.
+
+Details: [Pick what to prioritize](#pick-what-to-prioritize), below the Quickstart.
 
 ## What you need
 
@@ -88,8 +98,9 @@ In `.env` next to `compose.yaml` (see `.env.example`), or with `docker run -e`:
 
 | knob | default | |
 |---|---|---|
+| `TUNE` | `speed` | What to prioritize: `speed`, `context` or `quality` (see [Pick what to prioritize](#pick-what-to-prioritize)). Any other value stops the boot. |
 | `CAP` | `700032` | The KV pool in tokens, shared by the sessions: admission reserves each request's prompt + `max_tokens` from it. About 5 KB of memory a token. |
-| `MAX_MODEL_LEN` | `262144` | The longest single request, prompt and output together. At most `CAP` less the guard rows (14 with DFlash2). |
+| `MAX_MODEL_LEN` | `262144` (`700018` with `TUNE=context`) | The longest single request, prompt and output together. At most `CAP` less the guard rows (14 with DFlash2). |
 | `DFLASH` | `1` | `1`: a request alone drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded and converted on the first boot. A request left alone when the others finish switches to it after 256 tokens of MTP. `0`: MTP only, nothing downloaded. |
 | `MENTAT` | `0` | `1`: register with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 | `DEFAULT_PRESENCE_PENALTY` | `greedy=0.2,greedy.thinking=0.5` | For greedy requests (temperature 0) only: a presence penalty of 0.2 on the reply and 0.7 inside the think block. Greedy decoding on this K2 quant can fall into exact repeats, such as the same tool call turn after turn. Sampling requests get none. A request's own `presence_penalty` is added on top. `0` turns it off. The format is in gr8's KNOBS.md. |
@@ -106,6 +117,18 @@ Advanced `gr8` options can be specified in `.env` as well: [gr8/KNOBS.md](https:
 [gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/e7d5c1f/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a
 5 GiB boot floor (`Dockerfile`).
+
+## Pick what to prioritize
+
+`TUNE` picks one of three sets of settings (`knobs.sh`). On one box it sets only `MAX_MODEL_LEN`, the longest single
+request. If you set `MAX_MODEL_LEN` yourself, `TUNE` leaves it alone. With `TUNE=context` and a `CAP` below 700,032,
+set `MAX_MODEL_LEN` too, to at most `CAP` less 14: the boot stops when `MAX_MODEL_LEN` is more than `CAP`.
+
+| `TUNE` | sets | you get | you give up | measured |
+|---|---|---|---|---|
+| `speed` (default) | `MAX_MODEL_LEN=262144` | Decode, one stream: code / prose / structured 54.2 / 28.6 / 66.4 tok/s. Prefill 8K / 32K / 128K: 1,045 / 1,060 / 875 tok/s. 1 / 2 / 4 / 8 streams: 39.8 / 45.2 / 52.7 / 58.1 tok/s in total. | Requests up to 262,144 tokens, prompt and output together. | The benchmark card above: one `gr8 glm53f bench` run of the image's defaults (`kindling.json`). |
+| `context` | `MAX_MODEL_LEN=700018`: the 700,032-token pool less DFlash2's 14 guard rows | One request up to 700,018 tokens. A 672K-token prompt: 901 s to the first token, 16 tok/s decode after it, 2.7 s from the prompt cache. | Admission reserves a request's prompt + `max_tokens` from the 700,032-token pool, so other requests wait for room. Any request past 32K tokens decodes alone anyway (gr8's `SHARE_LIMIT`). Under the 672K prompt the lowest free memory was 3.9 GiB on Kindling Spark OS, about 2 GiB less on DGX OS. | The 672K row of More numbers, below: the same box as the benchmark card. |
+| `quality` | the same as `speed` | The same as `speed`. | Nothing. | Nothing else to measure: K2 is the one width of the release whose weights fit one box ([gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/e7d5c1f/docs/FLASH.md)), and the image builds only the int4 KV engine. The [release card](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4/blob/867580abd28d142bb4c56218bb81a752b7dea988/README.md) scores K4 against BF16, not K2. |
 
 ## The prompt cache
 

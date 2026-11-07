@@ -91,10 +91,21 @@ jobs:
             done
             bin/g6front-rs --help > /dev/null
             echo binaries OK'
-          docker run --rm "$img" show-config --no-check | grep -E "^  (TP|PEERS|CAP|DFLASH|KV_FORMAT|VARIANT|SESS) "
+          docker run --rm "$img" show-config --no-check | grep -E "^  (TP|PEERS|CAP|MAX_MODEL_LEN|DFLASH|KV_FORMAT|VARIANT|SESS) "
+          want() {  # want NAME=VALUE [docker run options]: show-config with these options has this cluster option
+            docker run --rm "${@:2}" "$img" show-config --no-check | grep -qx "  $1" || { echo "want $1 with ${*:2}"; exit 1; }
+          }
+          want MAX_MODEL_LEN=262144
+          want MAX_MODEL_LEN=262144 -e TUNE=quality
+          want MAX_MODEL_LEN=700018 -e TUNE=context
+          want MAX_MODEL_LEN=300000 -e TUNE=context -e MAX_MODEL_LEN=300000
           docker run --rm -e MENTAT=1 "$img" show-config --no-check | grep -E "^  (MENTAT|GROUP) "
           rc=0; err=$(docker run --rm -e MENTAT=2 "$img" show-config --no-check 2>&1) || rc=$?
           [ "$rc" = 2 ] && echo "$err" | grep -q "want 0" || { echo "MENTAT=2: exit $rc: $err"; exit 1; }
+          rc=0; err=$(docker run --rm -e TUNE=fast "$img" show-config --no-check 2>&1) || rc=$?
+          [ "$rc" = 2 ] && echo "$err" | grep -q "want speed" || { echo "TUNE=fast: exit $rc: $err"; exit 1; }
+          rc=0; err=$(docker run --rm -e TUNE=context -e CAP=262208 "$img" show-config --no-check 2>&1) || rc=$?
+          [ "$rc" = 2 ] && echo "$err" | grep -q "more than CAP" || { echo "TUNE=context CAP=262208: exit $rc: $err"; exit 1; }
           echo smoke OK
       - name: Push
         id: push

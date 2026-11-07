@@ -105,11 +105,13 @@ RUN mkdir -p /var/lib/gr8/home /var/lib/gr8/cache /var/lib/gr8/prompts \
 ENV PATH=/opt/glm53f-1x/bin:/opt/gr8/bin:$PATH PYTHONPATH=/opt/gr8/frontend HOME=/tmp GR8_CONTAINER=1 GR8_MODEL=glm53f \
     GR8_WORK_DIR=/var/lib/gr8/home MODEL_CACHE=/var/lib/gr8/cache PY=/usr/bin/python3 FRONT_BIN=/opt/gr8/bin/g6front-rs
 # The recipe's knobs (README.md, "Knobs"). Set any of them in .env, or with docker run -e, to override.
+#   TUNE           speed: requests up to 262,144 tokens; context: one request up to 700,018; quality: the same as
+#                  speed. A MAX_MODEL_LEN set on its own keeps its value (knobs.sh)
 #   CAP            the KV pool in tokens, shared by the sessions (about 5 KB of memory a token)
-#   MAX_MODEL_LEN  the longest single request, prompt and output together
+#   MAX_MODEL_LEN  the longest single request, prompt and output together. No default here: knobs.sh sets it from TUNE
 #   DFLASH         1: a request alone drafts with the DFlash2 drafter (fetched and converted on the first boot); 0: MTP only
 #   MENTAT         0: this box alone; 1: register with the mentat cluster (knobs.sh)
-ENV CAP=700032 MAX_MODEL_LEN=262144 DFLASH=1 MENTAT=0
+ENV CAP=700032 TUNE=speed DFLASH=1 MENTAT=0
 # The rest of the recipe, as gr8's launcher options (gr8/KNOBS.md)
 #   MODEL, DRAFTER: pinned to the Hugging Face commits measured here. The model cache is keyed by commit, so a new
 #   commit on either repo (even a README edit) changes nothing until these move.
