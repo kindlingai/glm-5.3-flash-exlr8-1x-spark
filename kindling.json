@@ -18,40 +18,40 @@
       "label": "TP=1",
       "nodes": 1,
       "decode": {
-        "code": 54.3,
-        "prose": 29.1,
-        "structured": 66.0
+        "code": 54.2,
+        "prose": 28.6,
+        "structured": 66.4
       },
       "prefill": [
         {
           "context": 8192,
-          "tps": 1214
+          "tps": 1045
         },
         {
           "context": 32768,
-          "tps": 1224
+          "tps": 1060
         },
         {
           "context": 131072,
-          "tps": 1048
+          "tps": 875
         }
       ],
       "concurrency": [
         {
           "streams": 1,
-          "aggregate_tps": 40.8
+          "aggregate_tps": 39.8
         },
         {
           "streams": 2,
-          "aggregate_tps": 44.1
+          "aggregate_tps": 45.2
         },
         {
           "streams": 4,
-          "aggregate_tps": 58.0
+          "aggregate_tps": 52.7
         },
         {
           "streams": 8,
-          "aggregate_tps": 59.2
+          "aggregate_tps": 58.1
         }
       ],
       "max_context": 262144,
@@ -59,12 +59,16 @@
       "max_concurrent": 4,
       "quality": [
         {
+          "name": "Needle at 128K",
+          "value": "found in 3 of 4 runs"
+        },
+        {
           "name": "int4 vs bf16 KV",
           "value": "top-1 12/12 after 8K and 32K prefills"
         },
         {
           "name": "Needle recall",
-          "value": "found at 128K (8 of 8 runs)"
+          "value": "found at 128K"
         }
       ]
     }
