@@ -114,8 +114,9 @@ The commands below use `TUNE=speed`: put in the value you picked.
    boot downloads the model even after a `docker run` boot.
 
 4. To change `TUNE` or any other knob later: stop and remove the container, then start it again with the new value,
-   the same way as before (compose: `docker compose down`, edit `.env`, `docker compose up -d`). The model stays in
-   the cache volume, so nothing is downloaded again.
+   the same way as before (compose: `docker compose down`, edit `.env`, `docker compose up -d`). A change of `TUNE` or
+   `MAX_MODEL_LEN` alone downloads nothing: the model and the drafter stay in the cache volume. A new `MODEL` or
+   `DRAFTER` commit, or `DFLASH=1` after boots with `DFLASH=0`, downloads what the cache does not have yet.
 
 ## 4. Check that it serves
 
