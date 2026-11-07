@@ -159,10 +159,17 @@ Wait for `serving:` in the log first; the checks after it confirm it.
 | `an engine is already running` or `a g6m4 --rank process is running` | ask the person, then stop the other model (README.md, Run another model) |
 | the image does not pull | build the image on the box, in a clone with its submodule. `docker compose build` (about 30 minutes cold) tags it `ghcr.io/kindlingai/glm-5.3-flash-exlr8-1x-spark:latest`. Without compose, `docker buildx build --platform linux/arm64 -t glm53f-1x-spark .`, then use the tag `glm53f-1x-spark` |
 
-The container exits with 0 after a stop, 1 when the engine failed, and 2 for bad options. Read a log with
-`docker exec glm53f-1x-spark gr8 glm53f logs supervisor` (or `shim` or `front`; with no name after `logs`, the
-engine's log). If a step fails for a reason not listed here, ask on the KindlingAI Discord (the link is at the top of
-README.md).
+The container exits with 0 after a stop, 1 when the engine failed, and 2 for bad options.
+`docker inspect -f '{{.State.ExitCode}}' glm53f-1x-spark` prints it.
+
+Read the log:
+
+- After the container exits: `docker logs glm53f-1x-spark` (compose: `docker compose logs`). It has the launcher's
+  output, and it is there until you remove the container.
+- While the container runs: `docker exec glm53f-1x-spark gr8 glm53f logs supervisor` (or `shim` or `front`; with no
+  name after `logs`, the engine's log).
+
+If a step fails for a reason not listed here, ask on the KindlingAI Discord (the link is at the top of README.md).
 
 ## 6. Not measured yet: tell the person
 
