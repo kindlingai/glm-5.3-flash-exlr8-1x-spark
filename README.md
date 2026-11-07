@@ -43,7 +43,7 @@ docker logs -f glm53f-1x-spark     # ready at "serving: http://..."
 ```
 
 The first boot downloads 87 GB from Hugging Face into the `glm53f-cache` volume (the model and the drafter) and converts
-the drafter: about 10 minutes in all. Later boots take about 50 s. Stop any other model on the box first: the weights
+the drafter: about 10 minutes in all. Later boots take about 45 s. Stop any other model on the box first: the weights
 take 93 GB.
 
 The API is OpenAI's on port 8100, and the model's name is `glm-5.3-flash` (`glm53f` also works):
