@@ -109,7 +109,6 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | KV pool | 700,032 tokens (int4 latent and pooled indexer keys, 3.5 GB), shared by up to 4 sessions. A request past 32K decodes alone (gr8's `SHARE_LIMIT`) |
 | longest request | 262,144 tokens, prompt and output together (`MAX_MODEL_LEN`) |
 | from the prompt cache | 32K prompt 0.25 s and 240K prompt 5.7 s to the first token |
-| GSM8K and HumanEval | 238/250 (95.2%) and 150/164 (91.5%), the bench's `quality` stage on the published image |
 | int4 KV against bf16 KV | next-token KL after 8K and 32K prefills: mean 0.013, median 0.0004, top-1 12/12 |
 | lowest free memory | 3.9 GiB on Kindling Spark OS under a 672K prompt at `CAP` 700,032 (about 2 GiB less on DGX OS) |
 | a 672K prompt (with `MAX_MODEL_LEN` raised) | 901 s to the first token, 16 tok/s decode after it, 2.7 s from the prompt cache |

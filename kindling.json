@@ -1,84 +1,76 @@
 {
- "version": 1,
- "title": "GLM-5.3-Flash",
- "variant": "exlr8 K2, int4 KV",
- "summary": "GLM-5.3-Flash on one GB10 with gr8: the K2 exlr8 release, int4 KV, DFlash2 for a request alone, four sessions sharing a 700K-token KV pool, and a prompt cache on disk.",
- "model": "kindlingai/glm-5.3-flash-exlr8-k2-k3-k4",
- "hardware": "ASUS GX10 / DGX Spark (GB10)",
- "stack": [
-  "gr8",
-  "exlr8",
-  "DFlash2",
-  "int4 KV"
- ],
- "default_config": "tp1",
- "configs": [
-  {
-   "id": "tp1",
-   "label": "TP=1",
-   "nodes": 1,
-   "decode": {
-    "code": 54.2,
-    "prose": 28.6,
-    "structured": 66.4
-   },
-   "prefill": [
+  "version": 1,
+  "title": "GLM-5.3-Flash",
+  "variant": "exlr8 K2, int4 KV",
+  "summary": "GLM-5.3-Flash on one GB10 with gr8: the K2 exlr8 release, int4 KV, DFlash2 for a request alone, four sessions sharing a 700K-token KV pool, and a prompt cache on disk.",
+  "model": "kindlingai/glm-5.3-flash-exlr8-k2-k3-k4",
+  "hardware": "ASUS GX10 / DGX Spark (GB10)",
+  "stack": [
+    "gr8",
+    "exlr8",
+    "DFlash2",
+    "int4 KV"
+  ],
+  "default_config": "tp1",
+  "configs": [
     {
-     "context": 8192,
-     "tps": 1045
-    },
-    {
-     "context": 32768,
-     "tps": 1060
-    },
-    {
-     "context": 131072,
-     "tps": 875
+      "id": "tp1",
+      "label": "TP=1",
+      "nodes": 1,
+      "decode": {
+        "code": 54.2,
+        "prose": 28.6,
+        "structured": 66.4
+      },
+      "prefill": [
+        {
+          "context": 8192,
+          "tps": 1045
+        },
+        {
+          "context": 32768,
+          "tps": 1060
+        },
+        {
+          "context": 131072,
+          "tps": 875
+        }
+      ],
+      "concurrency": [
+        {
+          "streams": 1,
+          "aggregate_tps": 39.8
+        },
+        {
+          "streams": 2,
+          "aggregate_tps": 45.2
+        },
+        {
+          "streams": 4,
+          "aggregate_tps": 52.7
+        },
+        {
+          "streams": 8,
+          "aggregate_tps": 58.1
+        }
+      ],
+      "max_context": 262144,
+      "kv_pool_tokens": 700032,
+      "max_concurrent": 4,
+      "quality": [
+        {
+          "name": "Needle at 128K",
+          "value": "found in 3 of 4 runs"
+        },
+        {
+          "name": "int4 vs bf16 KV",
+          "value": "top-1 12/12 after 8K and 32K prefills"
+        },
+        {
+          "name": "Needle recall",
+          "value": "found at 128K"
+        }
+      ]
     }
-   ],
-   "concurrency": [
-    {
-     "streams": 1,
-     "aggregate_tps": 39.8
-    },
-    {
-     "streams": 2,
-     "aggregate_tps": 45.2
-    },
-    {
-     "streams": 4,
-     "aggregate_tps": 52.7
-    },
-    {
-     "streams": 8,
-     "aggregate_tps": 58.1
-    }
-   ],
-   "max_context": 262144,
-   "kv_pool_tokens": 700032,
-   "max_concurrent": 4,
-   "quality": [
-    {
-     "name": "GSM8K",
-     "value": "238/250 (95.2%)"
-    },
-    {
-     "name": "HumanEval",
-     "value": "150/164 (91.5%)"
-    },
-    {
-     "name": "Needle at 128K",
-     "value": "found in 3 of 4 runs"
-    },
-    {
-     "name": "int4 vs bf16 KV",
-     "value": "top-1 12/12 after 8K and 32K prefills"
-    },
-    {
-     "name": "Needle recall",
-     "value": "found at 128K"
-    }
-   ]
-  }
- ]
+  ]
 }
