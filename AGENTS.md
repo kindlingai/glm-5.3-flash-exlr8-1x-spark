@@ -131,6 +131,9 @@ Wait for `serving:` in the log first; the checks after it confirm it.
 - `docker exec glm53f-1x-spark gr8 glm53f status` shows the box's state, engine and free memory.
 - `docker exec glm53f-1x-spark gr8 glm53f smoke` runs gr8's smoke test, 14 checks against the API. It ends with
   `14/14 passed` and exits 0 when every check passes.
+- `docker exec glm53f-1x-spark gr8 glm53f bench --hosts ''` runs gr8's bench against the API. Without `--hosts ''` it
+  stops with `FileNotFoundError: 'ssh'`. The bench reaches the box over ssh to cool and sample its GPU, and the image
+  has no ssh. With `--hosts ''` the bench does not cool the GPU between stages.
 - The API is OpenAI-compatible, on port 8100, with the model name `glm-5.3-flash` (`glm53f` also works). Send one
   chat:
 

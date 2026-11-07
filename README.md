@@ -156,6 +156,10 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 
 The GPU reaches 90 C in a 128K prefill, and the bench then holds it at 1,800 MHz, so the long prefills are partly capped.
 
+To run the bench in the image: `docker exec glm53f-1x-spark gr8 glm53f bench --hosts ''`. Without `--hosts ''` it
+stops with `FileNotFoundError: 'ssh'`. The bench reaches the box over ssh to cool and sample its GPU, and the image
+has no ssh. With `--hosts ''` the bench does not cool the GPU between stages, unlike the card's run.
+
 ## Run another model
 
 A box runs one model at a time, and gr8 does not start while another gr8 engine runs on it. To switch, stop and remove
