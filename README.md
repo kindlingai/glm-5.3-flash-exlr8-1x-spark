@@ -12,6 +12,13 @@ int4 KV, DFlash2 speculative decoding, four requests at once, and a prompt cache
 
 *Four requests decoding at once on one GB10, played at 2x speed.*
 
+## What you need
+
+- One DGX Spark, or another GB10 box such as the ASUS GX10 (128 GB).
+- Docker and the NVIDIA container toolkit (both come with DGX OS).
+- At least 87 GB of free disk for the download (the model and the drafter), and up to 64 GB more for the prompt cache.
+- No other model running on the box: the weights take 93 GB.
+
 ## Quickstart
 
 On the Spark, with Docker and the NVIDIA container toolkit (both come with DGX OS), run the published image:
