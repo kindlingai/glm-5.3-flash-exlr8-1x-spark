@@ -85,8 +85,8 @@ The image pins the weights to the Hugging Face commits measured below: the relea
 and the drafter at [`bf582e4`](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2/tree/bf582e4eacc1810f76656d1811693ff6c6737d2a).
 Set `MODEL` or `DRAFTER` in `.env` as needed (`https://huggingface.co/<org>/<repo>@<commit>`).
 
-Advanced `gr8` options can be specified in `.env` as well: [gr8/KNOBS.md](https://github.com/kindlingai/gr8/blob/b887747/KNOBS.md) lists them, and
-[gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/b887747/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
+Advanced `gr8` options can be specified in `.env` as well: [gr8/KNOBS.md](https://github.com/kindlingai/gr8/blob/e7d5c1f/KNOBS.md) lists them, and
+[gr8/docs/FLASH.md](https://github.com/kindlingai/gr8/blob/e7d5c1f/docs/FLASH.md) covers GLM-5.3-Flash. The image sets `TP=1`, `SESS=4`, `VARIANT=k2`,
 `KV_FORMAT=int4`, the prompt cache (`FLASH_CACHE=aligned`, `KV_STORE=@/etc/gr8/kv-store.yaml`), one prefill lane and a
 5 GiB boot floor (`Dockerfile`).
 
