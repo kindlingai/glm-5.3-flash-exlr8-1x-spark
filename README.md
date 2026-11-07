@@ -115,3 +115,22 @@ The card above is one `gr8 glm53f bench` run of the image's defaults (`kindling.
 | boot | 45 s from the cache. The first boot downloads the 85 GB model at about 160 MB/s (8 min), then the 2.3 GB drafter, and converts the drafter in 5 s |
 
 The GPU reaches 90 C in a 128K prefill, and the bench then holds it at 1,800 MHz, so the long prefills are partly capped.
+
+## Run another model
+
+A box runs one model at a time, and gr8 does not start while another gr8 engine runs on it. To switch, stop and remove
+this one first:
+
+```bash
+docker stop glm53f-1x-spark && docker rm glm53f-1x-spark   # compose: docker compose down
+```
+
+The model stays in the `glm53f-cache` volume, so a later start of this recipe downloads nothing. To free the disk
+(87 GB, and up to 64 GB of prompt checkpoints), remove the volumes:
+
+```bash
+docker volume rm glm53f-cache glm53f-prompts glm53f-home   # compose: docker compose down -v
+```
+
+[gr8's Recipes](https://github.com/kindlingai/gr8#recipes) lists the other models and the number of boxes each one
+needs.
