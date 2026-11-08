@@ -35,7 +35,7 @@ Set the values in `.env` (compose) or with `docker run -e`.
 |---|---|---|
 | `speed` (default) | `MAX_MODEL_LEN=262144` | the settings README.md's numbers were measured with: requests up to 262,144 tokens |
 | `context` | `MAX_MODEL_LEN=700018` | one request up to 700,018 tokens: the 700,032-token pool less DFlash2's 14 guard rows. A request that long leaves little room in the pool, and other requests wait |
-| `quality` | `MAX_MODEL_LEN=262144` | the same as `speed`: K2 is the one width of the release that fits one box, and the image builds only the int4 KV engine |
+| `quality` | `MAX_MODEL_LEN=262144` | the same as `speed`: K3 and K4 do not fit one box, and the image builds only the int4 KV engine |
 
 What else `knobs.sh` does:
 

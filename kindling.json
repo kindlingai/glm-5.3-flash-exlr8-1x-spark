@@ -1,8 +1,8 @@
 {
  "version": 1,
  "title": "GLM-5.3-Flash",
- "variant": "exlr8 K2, int4 KV",
- "summary": "GLM-5.3-Flash on one GB10 with gr8: the K2 exlr8 release, int4 KV, DFlash2 for a request alone, four sessions sharing a 700K-token KV pool, and a prompt cache on disk.",
+ "variant": "exlr8 bit201, int4 KV",
+ "summary": "GLM-5.3-Flash on one GB10 with gr8: the bit201 exlr8 manifest, int4 KV, DFlash2 for a request alone, four sessions sharing a 700K-token KV pool, and a prompt cache on disk.",
  "model": "kindlingai/glm-5.3-flash-exlr8-k2-k3-k4",
  "hardware": "ASUS GX10 / DGX Spark (GB10)",
  "stack": [
@@ -18,40 +18,40 @@
    "label": "TP=1",
    "nodes": 1,
    "decode": {
-    "code": 54.2,
-    "prose": 28.6,
-    "structured": 66.4
+    "code": 53.8,
+    "prose": 28.2,
+    "structured": 65.1
    },
    "prefill": [
     {
      "context": 8192,
-     "tps": 1045
+     "tps": 995
     },
     {
      "context": 32768,
-     "tps": 1060
+     "tps": 1024
     },
     {
      "context": 131072,
-     "tps": 875
+     "tps": 916
     }
    ],
    "concurrency": [
     {
      "streams": 1,
-     "aggregate_tps": 39.8
+     "aggregate_tps": 43.5
     },
     {
      "streams": 2,
-     "aggregate_tps": 45.2
+     "aggregate_tps": 41.3
     },
     {
      "streams": 4,
-     "aggregate_tps": 52.7
+     "aggregate_tps": 53.4
     },
     {
      "streams": 8,
-     "aggregate_tps": 58.1
+     "aggregate_tps": 57.5
     }
    ],
    "max_context": 262144,
