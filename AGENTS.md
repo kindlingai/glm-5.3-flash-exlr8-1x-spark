@@ -180,8 +180,7 @@ This list is the recipe's checklist of what is still to be measured. If the pers
 post the numbers on Discord or in an issue (https://github.com/kindlingai/glm-5.3-flash-exlr8-1x-spark/issues).
 
 - `TUNE=context` was measured once, on the box of README.md's benchmark card, with `MAX_MODEL_LEN` raised: one
-  672K-token prompt (README.md, More numbers). The lowest free memory was 3.9 GiB on Kindling Spark OS; README.md
-  gives about 2 GiB less on DGX OS.
+  672K-token prompt. The lowest free memory was 3.9 GiB on Kindling Spark OS, and about 2 GiB less on DGX OS.
 - The K2 width that every `TUNE` value runs has not been scored against BF16: the release card scores K4 only, and
   says to measure K2 on your own workload before relying on it.
 - A `CAP` above 700,032: README.md says Kindling Spark OS may allow `1000000`. This recipe has no measurement there.
