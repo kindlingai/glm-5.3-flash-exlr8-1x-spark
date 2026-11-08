@@ -5,7 +5,8 @@ If you are an agent booting this for someone, read [AGENTS.md](AGENTS.md) first,
 _**Join our discord to learn more about KindlingAI and `gr8`: https://discord.gg/8EAvYPV2rE**_
 
 GLM-5.3-Flash on one DGX Spark (GB10, 128 GB), served by [gr8](https://github.com/kindlingai/gr8)
-from the K2 width of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4).
+from the bit201 manifest of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
+K2, with the 124 routed experts that carry the most routing weight at tool-call positions at K3.
 
 ![GLM-5.3-Flash on one GB10: decode, prefill and concurrency](docs/card.png)
 
@@ -98,7 +99,7 @@ can also set in `.env`.
 - `speed` (the default): a request can be up to 262,144 tokens.
 - `context`: one request up to 700,018 tokens. With a `CAP` below 700,032, also set `MAX_MODEL_LEN` to at most `CAP`
   less 14, or the boot stops.
-- `quality`: the same as `speed`. K2 is the one width of the release that fits one box.
+- `quality`: the same as `speed`. K3 and K4 do not fit one box.
 
 If you set `MAX_MODEL_LEN` yourself, `TUNE` leaves it alone.
 

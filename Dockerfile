@@ -149,8 +149,8 @@ ENV CAP=700032 TUNE=speed DFLASH=1 MENTAT=0
 #   SESS:       four requests decode at once; a request alone drafts with DFlash2
 #   EXTRA_ARGS: one prefill lane, as the second lane's scratch does not fit beside the weights at TP=1
 #   EXTRA_ENV:  the boot keeps 5 GiB free (gr8's default 8 leaves no room for this CAP beside the weights)
-ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=k2 KV_FORMAT=int4 FLASH_CACHE=aligned KV_STORE=@/etc/gr8/kv-store.yaml \
-    MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4@867580abd28d142bb4c56218bb81a752b7dea988 \
+ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=bit201 KV_FORMAT=int4 FLASH_CACHE=aligned KV_STORE=@/etc/gr8/kv-store.yaml \
+    MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4@901ad084f0afd2400820504910d3e684133ce183 \
     DRAFTER=https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2@bf582e4eacc1810f76656d1811693ff6c6737d2a \
     EXTRA_ARGS="--pf-lanes 1" EXTRA_ENV="GR8_MEM_MIN=5"
 # Repetition, for greedy requests only (temperature 0): a presence penalty of 0.2 on the reply and 0.7 inside the think
