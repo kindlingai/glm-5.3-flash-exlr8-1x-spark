@@ -5,8 +5,12 @@ If you are an agent booting this for someone, read [AGENTS.md](AGENTS.md) first,
 _**Join our discord to learn more about KindlingAI and `gr8`: https://discord.gg/8EAvYPV2rE**_
 
 GLM-5.3-Flash on one DGX Spark (GB10, 128 GB), served by [gr8](https://github.com/kindlingai/gr8)
-from the bit201 manifest of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
+from the `bit201` manifest of [kindlingai/glm-5.3-flash-exlr8-k2-k3-k4](https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4):
 K2, with the 124 routed experts that carry the most routing weight at tool-call positions at K3.
+
+K2, K3 and K4 are the release's three widths for the experts: 2, 3 and 4 bits a weight. A manifest is the file in the
+release that says which width each expert is read at. `bit201` reads about 2.01 bits a routed weight; `VARIANT=k2`
+(below) reads every expert at K2. The model card has the rest.
 
 ![GLM-5.3-Flash on one GB10: decode, prefill and concurrency](docs/card.png)
 
@@ -17,7 +21,8 @@ K2, with the 124 routed experts that carry the most routing weight at tool-call 
 - One DGX Spark, or another GB10 box such as the ASUS GX10 (128 GB).
 - Docker and the NVIDIA container toolkit (both come with DGX OS).
 - At least 87 GB of free disk for the download (the model and the drafter), and up to 64 GB more for the prompt cache.
-- No other model running on the box: the weights take 93 GB.
+- No other model running on the box: the weights take about 93 GB of memory. That is memory, not disk: the download is
+  87 GB. The 93 GB was measured with the K2 manifest, and `bit201` takes about 0.4 GB more.
 
 ## Quickstart
 
@@ -33,7 +38,8 @@ docker logs -f glm53f-1x-spark     # ready at "serving: http://..."
 ```
 
 The first boot downloads 87 GB from Hugging Face into the `glm53f-cache` volume and converts the drafter: about
-10 minutes in all. Later boots take about 45 s.
+10 minutes in all. Later boots took about 45 s when measured on one GX10 with the K2 manifest. That was before `bit201`,
+and it has not been measured again.
 
 The API is OpenAI's on port 8100, and the model's name is `glm-5.3-flash` (`glm53f` also works):
 
@@ -79,8 +85,9 @@ Set these in `.env` next to `compose.yaml` (see `.env.example`), or with `docker
 | `TUNE` | `speed` | What to prioritize, see below. Any other value stops the boot. |
 | `CAP` | `700032` | The KV pool in tokens, shared by the sessions. Each request reserves its prompt + `max_tokens` from it. |
 | `MAX_MODEL_LEN` | `262144` (`700018` with `TUNE=context`) | The longest single request, prompt and output together. At most `CAP` less 14. |
+| `VARIANT` | `bit201` | Which manifest of the release the engine reads: `bit201`, or `k2` for every expert at K2 (about 0.4 GB smaller). |
 | `DFLASH` | `1` | `1` drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded on the first boot. `0` uses MTP only and downloads nothing. |
-| `MENTAT` | `0` | `1` registers with the mentat cluster through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
+| `MENTAT` | `0` | `1` registers with the [mentat](https://github.com/kindlingai/mentat) cluster manager through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
 | `DEFAULT_PRESENCE_PENALTY` | `greedy=0.2,greedy.thinking=0.5` | A presence penalty for greedy requests (temperature 0) only, to stop exact repeats. `0` turns it off. |
 
 `CAP` was tuned on a standard DGX OS install. On Kindling Spark OS (https://github.com/kindlingai/kindling-spark-os)

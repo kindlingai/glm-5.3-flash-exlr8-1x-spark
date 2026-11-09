@@ -15,7 +15,8 @@ cannot run a check yourself, ask the person to run it and paste the output. Do n
   `MODEL_CACHE_DIR` and `PROMPT_CACHE_DIR` to host directories owned by uid 1000 instead.
 - The box can reach Hugging Face for the download: `curl -sI https://huggingface.co` answers.
 - No other model runs on the box: `docker ps` shows no other model container, and `nvidia-smi` shows no GPU process.
-  The weights take 93 GB, and gr8 does not start while another gr8 engine runs on the box.
+  The weights take about 93 GB of memory (measured with the K2 manifest; `bit201` takes about 0.4 GB more), and gr8 does
+  not start while another gr8 engine runs on the box.
 - Optional: gr8 logs a warning at boot when proactive memory compaction is on. `sysctl vm.compaction_proactiveness`
   prints 0 when it is off. To turn it off, as root, once (gr8/docs/DEPLOY.md):
 
@@ -51,8 +52,9 @@ Every knob:
 | `TUNE` | `speed`, `context`, `quality` | `speed` |
 | `CAP` | the KV pool in tokens, shared by the sessions, a multiple of 64; about 5 KB of memory a token. It was tuned on DGX OS. README.md says Kindling Spark OS may allow `1000000`; that is not measured (section 6) | `700032` |
 | `MAX_MODEL_LEN` | the longest single request, prompt and output together: at most `CAP` less the guard rows (14 with DFlash2), and at most 1,048,576 | by `TUNE` (table above) |
+| `VARIANT` | the release's manifest: `bit201` (K2, with 124 routed experts at K3), or `k2` (every expert at K2, about 0.4 GB smaller). A name other than `k2`, `k3` or `k4` needs `MODEL` pinned to a commit (`knobs.sh`); the default is. `k3` and `k4` do not fit one box | `bit201` |
 | `DFLASH` | `1`: a request alone drafts with the DFlash2 drafter (licence CC BY-NC-ND 4.0), downloaded and converted on the first boot. `0`: MTP only, nothing downloaded | `1` |
-| `MENTAT` | `0`: this box alone. `1`: register with the `mentat` cluster through the host's `mentat` daemon, in group `GROUP` | `0` |
+| `MENTAT` | `0`: this box alone. `1`: register with the [`mentat`](https://github.com/kindlingai/mentat) cluster through the host's `mentat` daemon, in group `GROUP` | `0` |
 | `GROUP` | the `mentat` group to register in, with `MENTAT=1` | `gr8-glm53f-1x` |
 | `DEFAULT_PRESENCE_PENALTY` | for greedy requests (temperature 0) only; `0` turns it off. The format is in gr8/KNOBS.md | `greedy=0.2,greedy.thinking=0.5` |
 | `MODEL_CACHE_DIR`, `PROMPT_CACHE_DIR`, `GR8_HOME_DIR` | compose only: host directories in place of compose's volumes, owned by uid 1000 | compose's volumes |
@@ -98,8 +100,8 @@ The commands below use `TUNE=speed`: put in the value you picked.
    ```
 
    The first boot downloads 87 GB from Hugging Face into the `glm53f-cache` volume (the model and the drafter) and
-   converts the drafter: README.md gives about 10 minutes in all, and about 45 s for later boots. With `mentat`, add
-   `-e MENTAT=1`.
+   converts the drafter: README.md gives about 10 minutes in all, and about 45 s for later boots (measured with the K2
+   manifest, before `bit201`; not measured again). With `mentat`, add `-e MENTAT=1`.
 
    Or with compose:
 
