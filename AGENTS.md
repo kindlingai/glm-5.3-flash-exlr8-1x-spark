@@ -57,8 +57,9 @@ Every knob:
 | `MENTAT` | `0`: this box alone. `1`: register with the [`mentat`](https://github.com/kindlingai/mentat) cluster through the host's `mentat` daemon, in group `GROUP` | `0` |
 | `GROUP` | the `mentat` group to register in, with `MENTAT=1` | `gr8-glm53f-1x` |
 | `DEFAULT_PRESENCE_PENALTY` | for greedy requests (temperature 0) only; `0` turns it off. The format is in gr8/KNOBS.md | `greedy=0.2,greedy.thinking=0.5` |
-| `DEFAULT_THINK_END_BOOST` | the `</think>` logit gains `per1k` a thousand thinking tokens past `start`, up to `max` (gr8 frontend/README.md, soft thinking budget). Use a token count for `start`: `0.5x` is half of `max_tokens`, or of the context room when the client sends none. Empty turns it off | `start=16384,per1k=2,max=10` |
-| `DEFAULT_THINKING_BUDGET` | the hard thinking budget in tokens, for a request that sets none; `0` = no limit. A request with `logprobs` gets none | `32768` |
+| `DEFAULT_MAX_TOKENS` | `max_tokens` for a chat request that names none. With `0`, gr8 gives such a request the larger of 8,192 and 32,704 less the prompt, so a long agent prompt gets 8,192 and runs out of tokens while thinking. Setting it drops the launcher's `--share-tokens`. Four long sessions at 32,768 still decoded together | `32768` |
+| `DEFAULT_THINK_END_BOOST` | the `</think>` logit gains `per1k` a thousand thinking tokens past `start`, up to `max` (gr8 frontend/README.md, soft thinking budget). `start` is a token count, or a share of the request's `max_tokens` such as `0.5x`. Empty turns it off | `start=16384,per1k=4,max=10` |
+| `DEFAULT_THINKING_BUDGET` | the hard thinking budget in tokens for a request that sets none; `0` = no limit. Keep it below `DEFAULT_MAX_TOKENS` so the reply has room to answer. A request with `logprobs` gets none | `28672` |
 | `MODEL_CACHE_DIR`, `PROMPT_CACHE_DIR`, `GR8_HOME_DIR` | compose only: host directories in place of compose's volumes, owned by uid 1000 | compose's volumes |
 | `IMAGE` | compose only: a pinned image, e.g. `ghcr.io/kindlingai/glm-5.3-flash-exlr8-1x-spark:sha-<commit>` | `:latest` |
 | `MODEL` | the release, `https://huggingface.co/<org>/<repo>@<commit>` | the commit README.md's numbers were measured with |

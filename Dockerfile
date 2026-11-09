@@ -158,10 +158,11 @@ ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=bit201 KV_FORMAT=int4 FLASH_CACHE=al
 # copied into the thinking); sampling requests get no penalty, and a client's own presence_penalty is added on top.
 ENV DEFAULT_PRESENCE_PENALTY="greedy=0.2,greedy.thinking=0.5"
 # Thinking length. With no limit, GLM-5.3-Flash at T=1 and maximum effort can think until max_tokens on a large agent
-# task and never answer (0 of 4 replays of one 34K-token coding step answered, with or without a better quant). From
-# the 16,384th thinking token, the </think> logit gains 2 a thousand tokens, up to 10: in replays every run closed on its
-# own at 20-27K tokens and answered. The hard budget at 32,768 is a backstop for a request the boost does not end.
-# Both count thinking tokens only. A request's own think_end_boost or thinking_budget wins.
-ENV DEFAULT_THINK_END_BOOST="start=16384,per1k=2,max=10" DEFAULT_THINKING_BUDGET=32768
+# task and never answer: 0 of 4 replays of one long coding step answered. A request that names no max_tokens gets
+# 32,768 tokens, where gr8 would otherwise give a long prompt only 8,192. From the 16,384th thinking token the </think>
+# logit gains 4 a thousand tokens, up to 10, and the thinking closes at 28,672 at the latest, leaving 4,096 to answer.
+# In replays every run answered, most closing on their own at 19-23K. Four long agent sessions at once still decoded
+# together. A request's own max_tokens, think_end_boost or thinking_budget wins.
+ENV DEFAULT_MAX_TOKENS=32768 DEFAULT_THINK_END_BOOST="start=16384,per1k=4,max=10" DEFAULT_THINKING_BUDGET=28672
 USER 1000:1000
 ENTRYPOINT ["/opt/glm53f-1x/entrypoint.sh"]
