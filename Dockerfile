@@ -161,7 +161,9 @@ ENV DEFAULT_PRESENCE_PENALTY="greedy=0.2,greedy.thinking=0.5"
 # task and never answer (0 of 4 replays of one 34K-token coding step answered, with or without a better quant). From
 # the 16,384th thinking token, the </think> logit gains 2 a thousand tokens, up to 10: in replays every run closed on its
 # own at 20-27K tokens and answered. The hard budget at 32,768 is a backstop for a request the boost does not end.
-# Both count thinking tokens only. A request's own think_end_boost or thinking_budget wins.
-ENV DEFAULT_THINK_END_BOOST="start=16384,per1k=2,max=10" DEFAULT_THINKING_BUDGET=32768
+# Both count thinking tokens only, and each takes whichever comes first of its token count and its share of the
+# request's max_tokens. A request with no max_tokens and a long prompt gets 8,192 tokens, so its boost starts at 4,096
+# and its budget closes at 6,554, leaving room to answer. A request's own think_end_boost or thinking_budget wins.
+ENV DEFAULT_THINK_END_BOOST="start=16384|0.5x,per1k=2,max=10" DEFAULT_THINKING_BUDGET="32768|0.8x"
 USER 1000:1000
 ENTRYPOINT ["/opt/glm53f-1x/entrypoint.sh"]
