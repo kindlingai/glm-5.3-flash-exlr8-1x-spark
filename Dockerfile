@@ -153,10 +153,12 @@ ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=bit201 KV_FORMAT=int4 FLASH_CACHE=al
     MODEL=https://huggingface.co/kindlingai/glm-5.3-flash-exlr8-k2-k3-k4@901ad084f0afd2400820504910d3e684133ce183 \
     DRAFTER=https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2@bf582e4eacc1810f76656d1811693ff6c6737d2a \
     EXTRA_ARGS="--pf-lanes 1" EXTRA_ENV="GR8_MEM_MIN=5"
-# Repetition, for greedy requests only (temperature 0): a presence penalty of 0.2 on the reply and 0.7 inside the think
-# block. Greedy decoding can fall into exact repeats on this K2 quant (the same tool call turn after turn, or a log
-# copied into the thinking); sampling requests get no penalty, and a client's own presence_penalty is added on top.
-ENV DEFAULT_PRESENCE_PENALTY="greedy=0.2,greedy.thinking=0.5"
+# Repetition. Inside the think block every request gets a presence penalty of 0.5 on thinking tokens: on long agent
+# turns the model at T=1 can copy its own reasoning paragraph after paragraph, and in agent-harness replays this stopped
+# the loops (worst repeat 4 copies, was 72) with all 54 edits landing. Greedy requests (temperature 0) also get 0.2 on
+# the reply, against exact repeats such as the same tool call turn after turn. The reply of a sampled request is not
+# penalized, so code copied into an answer is untouched. A client's own presence_penalty is added on top.
+ENV DEFAULT_PRESENCE_PENALTY="greedy=0.2,greedy.thinking=0.5,nongreedy.thinking=0.5"
 # Thinking length. With no limit, GLM-5.3-Flash at T=1 and maximum effort can think until max_tokens on a large agent
 # task and never answer: 0 of 4 replays of one long coding step answered. A request that names no max_tokens gets
 # 32,768 tokens, where gr8 would otherwise give a long prompt only 8,192. From the 16,384th thinking token the </think>

@@ -88,7 +88,7 @@ Set these in `.env` next to `compose.yaml` (see `.env.example`), or with `docker
 | `VARIANT` | `bit201` | Which manifest of the release the engine reads: `bit201`, or `k2` for every expert at K2 (about 0.4 GB smaller). |
 | `DFLASH` | `1` | `1` drafts with [DFlash2](https://huggingface.co/incoai/GLM-5.3-Flash-DFlash2) (CC BY-NC-ND 4.0), downloaded on the first boot. `0` uses MTP only and downloads nothing. |
 | `MENTAT` | `0` | `1` registers with the [mentat](https://github.com/kindlingai/mentat) cluster manager through the host's mentat daemon, in group `GROUP` (`gr8-glm53f-1x`). |
-| `DEFAULT_PRESENCE_PENALTY` | `greedy=0.2,greedy.thinking=0.5` | A presence penalty for greedy requests (temperature 0) only, to stop exact repeats. `0` turns it off. |
+| `DEFAULT_PRESENCE_PENALTY` | `greedy=0.2,greedy.thinking=0.5,nongreedy.thinking=0.5` | A presence penalty on thinking tokens (0.5) to stop the model repeating its own reasoning, plus 0.2 on the reply for greedy requests (temperature 0). The reply of a sampled request gets none. `0` turns it off. |
 | `DEFAULT_MAX_TOKENS` | `32768` | `max_tokens` for a request that names none. `0` lets gr8 choose: 8,192 for a long prompt, too little for long agent turns. |
 | `DEFAULT_THINK_END_BOOST` | `start=16384,per1k=4,max=10` | After 16,384 thinking tokens, makes the end of thinking a little more likely with each token, so a long think ends where the model is ready to stop. Empty turns it off. |
 | `DEFAULT_THINKING_BUDGET` | `28672` | The most thinking tokens a request gets, after which its thinking is closed and it answers. `0` means no limit. |
