@@ -56,7 +56,7 @@ Every knob:
 | `DFLASH` | `1`: a request alone drafts with the DFlash2 drafter (licence CC BY-NC-ND 4.0), downloaded and converted on the first boot. `0`: MTP only, nothing downloaded | `1` |
 | `MENTAT` | `0`: this box alone. `1`: register with the [`mentat`](https://github.com/kindlingai/mentat) cluster through the host's `mentat` daemon, in group `GROUP` | `0` |
 | `GROUP` | the `mentat` group to register in, with `MENTAT=1` | `gr8-glm53f-1x` |
-| `DEFAULT_PRESENCE_PENALTY` | for greedy requests (temperature 0) only; `0` turns it off. The format is in gr8/KNOBS.md | `greedy=0.2,greedy.thinking=0.5` |
+| `DEFAULT_PRESENCE_PENALTY` | inside the think block 0.5 for every request; on the reply 0.2 for greedy requests only. The format is in gr8/KNOBS.md; `0` turns it off | `greedy=0.2,greedy.thinking=0.5,nongreedy.thinking=0.5` |
 | `DEFAULT_MAX_TOKENS` | `max_tokens` for a chat request that names none. With `0`, gr8 gives such a request the larger of 8,192 and 32,704 less the prompt, so a long agent prompt gets 8,192 and runs out of tokens while thinking. Setting it drops the launcher's `--share-tokens`. Four long sessions at 32,768 still decoded together | `32768` |
 | `DEFAULT_THINK_END_BOOST` | the `</think>` logit gains `per1k` a thousand thinking tokens past `start`, up to `max` (gr8 frontend/README.md, soft thinking budget). `start` is a token count, or a share of the request's `max_tokens` such as `0.5x`. Empty turns it off | `start=16384,per1k=4,max=10` |
 | `DEFAULT_THINKING_BUDGET` | the hard thinking budget in tokens for a request that sets none; `0` = no limit. Keep it below `DEFAULT_MAX_TOKENS` so the reply has room to answer. A request with `logprobs` gets none | `28672` |
