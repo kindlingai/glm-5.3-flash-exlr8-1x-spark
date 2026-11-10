@@ -159,6 +159,9 @@ ENV TP=1 SESS=4 GROUP=gr8-glm53f-1x VARIANT=bit201 KV_FORMAT=int4 FLASH_CACHE=al
 # the reply, against exact repeats such as the same tool call turn after turn. The reply of a sampled request is not
 # penalized, so code copied into an answer is untouched. A client's own presence_penalty is added on top.
 ENV DEFAULT_PRESENCE_PENALTY="greedy=0.2,greedy.thinking=0.5,nongreedy.thinking=0.5"
+# A call to a tool the request did not declare comes back as a tool call, so an agent can answer it with its own
+# unknown-tool error and the model can correct itself; text keeps it in the reply's content.
+ENV UNDECLARED_TOOL_CALLS=emit
 # Thinking length. With no limit, GLM-5.3-Flash at T=1 and maximum effort can think until max_tokens on a large agent
 # task and never answer: 0 of 4 replays of one long coding step answered. A request that names no max_tokens gets
 # 32,768 tokens, where gr8 would otherwise give a long prompt only 8,192. From the 16,384th thinking token the </think>
