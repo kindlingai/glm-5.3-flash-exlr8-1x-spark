@@ -165,7 +165,10 @@ jobs:
             echo binaries OK'
           docker run --rm "$img" show-config --no-check | grep -E "^  (TP|PEERS|CAP|MAX_MODEL_LEN|DFLASH|KV_FORMAT|VARIANT|SESS) "
           want() {  # want NAME=VALUE [docker run options]: show-config with these options has this cluster option
-            docker run --rm "${@:2}" "$img" show-config --no-check | grep -qx "  $1" || { echo "want $1 with ${*:2}"; exit 1; }
+            # show-config prints "  NAME  VALUE  scope  (origin)" in aligned columns; newer gr8 no longer repeats them as
+            # "  NAME=VALUE" in its cluster options
+            docker run --rm "${@:2}" "$img" show-config --no-check | awk -v n="${1%%=*}" -v v="${1#*=}" '$1 == n && $2 == v { f = 1 } END { exit !f }' \
+              || { echo "want $1 with ${*:2}"; exit 1; }
           }
           want MAX_MODEL_LEN=262144
           want MAX_MODEL_LEN=262144 -e TUNE=quality
